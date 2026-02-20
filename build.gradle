@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id "hytale-mod" version "0.+"
+}
+
+version = project.mod_version
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://maven.hytale.com/release" }
+    maven { url "https://cursemaven.com" }
+
+    flatDir {
+        dirs("libs")
+    }
+}
+
+hytale {
+    // updateChannel = "pre-release"
+}
+
+dependencies {
+    implementation "com.hypixel.hytale:Server:${project.hytale_version}"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+processResources {
+    var expandProps = [
+            'name'       : project.name,
+            'version'    : project.version,
+            'group'      : project.group,
+            'hytale_version' : project.hytale_version,
+            'entry_point': project.entry_point
+    ]
+
+    filesMatching(['manifest.json']) {
+        expand expandProps
+    }
+}
