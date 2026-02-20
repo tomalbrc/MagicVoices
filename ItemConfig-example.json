@@ -1,0 +1,40 @@
+{
+  "VoskModelPath": "vosk-small-en-us",
+  "Spells": [
+    {
+      "Item": "Rock_Aqua_Brick",
+      "Interaction": "Test_Heal",
+      "Words": "heal"
+    },
+    {
+      "Item": "Rock_Aqua_Brick",
+      "Interaction": "Magic_Roots_Launch",
+      "Words": "test"
+    },
+    {
+      "Item": "Rock_Aqua_Brick",
+      "Interaction": "Magic_Test_Launch",
+      "Words": "cast"
+    },
+    {
+      "Item": "Rock_Aqua_Brick",
+      "Interaction": "Magic_Iceball_Launch",
+      "Words": "freeze"
+    },
+    {
+      "Item": "Rock_Aqua_Brick",
+      "Interaction": "Dragon_Frost_Stomp",
+      "Words": "slam"
+    },
+    {
+      "Item": "Rock_Aqua_Brick",
+      "Interaction": "Magic_Fireball_Launch",
+      "Words": "fireball"
+    },
+    {
+      "Item": "Rock_Aqua_Brick",
+      "Interaction": "Magic_Icebolt_Launch",
+      "Words": "ice bolt"
+    }
+  ]
+}

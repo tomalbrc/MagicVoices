@@ -1,0 +1,13 @@
+{
+  "Cooldown": {
+    "Cooldown": 2
+  },
+  "Tags": {
+    "Attack": [
+      "Ranged"
+    ]
+  },
+  "Interactions": [
+    "Skeleton_Archmage_Staff_Corruption_Orb"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "Cooldown": {
+    "Cooldown": 2
+  },
+  "Tags": {
+    "Attack": [
+      "Ranged"
+    ]
+  },
+  "Interactions": [
+    {
+      "Type": "LaunchProjectile",
+      "ProjectileId": "Fireball",
+      "RunTime": 0.25
+    }
+  ]
+}

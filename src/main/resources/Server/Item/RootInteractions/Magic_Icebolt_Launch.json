@@ -1,0 +1,17 @@
+{
+  "Cooldown": {
+    "Cooldown": 2
+  },
+  "Tags": {
+    "Attack": [
+      "Ranged"
+    ]
+  },
+  "Interactions": [
+    {
+      "Type": "LaunchProjectile",
+      "ProjectileId": "Ice_Bolt",
+      "RunTime": 0.25
+    }
+  ]
+}

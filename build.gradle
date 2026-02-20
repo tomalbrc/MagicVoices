@@ -1,48 +1,42 @@
 plugins {
-    id 'java'
-    id "hytale-mod" version "0.+"
+    id 'dev.scaffoldit' version '0.2.+'
 }
 
 version = project.mod_version
 
-base {
-    archivesName = project.archives_base_name
-}
-
-repositories {
-    mavenCentral()
-    maven { url "https://maven.hytale.com/release" }
-    maven { url "https://cursemaven.com" }
-
-    flatDir {
-        dirs("libs")
-    }
-}
-
 hytale {
-    // updateChannel = "pre-release"
-}
+    usePatchline 'release'
+    useVersion 'latest'
 
-dependencies {
-    implementation "com.hypixel.hytale:Server:${project.hytale_version}"
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
-}
 
-processResources {
-    var expandProps = [
-            'name'       : project.name,
-            'version'    : project.version,
-            'group'      : project.group,
-            'hytale_version' : project.hytale_version,
-            'entry_point': project.entry_point
-    ]
+    dependencies {
+        implementation 'io.github.jaredmdobson:concentus:1.0.1'
+        implementation 'com.github.veeley:jitsi-webrtc-vad-wrapper:8f2a3cc455'
 
-    filesMatching(['manifest.json']) {
-        expand expandProps
+        // Vosk Java binding (offline speech recognition)
+        implementation 'com.alphacephei:vosk:0.3.38'
+
+        // required by Vosk for native bindings
+        implementation 'net.java.dev.jna:jna:5.7.0'
+    }
+
+    manifest {
+        group = project.group
+        name = project.name
+        main = project.entry_point
+        version = project.version
+        serverVersion = project.hytale_version
+        disabledByDefault = false
+        includesAssetPack = false
+        dependencies = [
+                'Hytale:EntityModule': '*',
+                'Hytale:ItemModule': '*',
+                'Hytale:VoiceModule': '*'
+        ]
+        subPlugins = []
     }
 }
