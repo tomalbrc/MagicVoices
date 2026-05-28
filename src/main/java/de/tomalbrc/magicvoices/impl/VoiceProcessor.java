@@ -1,12 +1,16 @@
 package de.tomalbrc.magicvoices.impl;
 
-import com.google.gson.JsonParser;
+import com.google.gson.Gson;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import io.github.jaredmdobson.OpusDecoder;
 import io.github.jaredmdobson.OpusException;
 import org.vosk.Recognizer;
 
+import java.util.List;
+
 public final class VoiceProcessor {
+    static Gson gson = new Gson();
+
     private final OpusDecoder decoder;
     private final Recognizer recognizer;
     private final PlayerRef playerRef;
@@ -72,18 +76,38 @@ public final class VoiceProcessor {
             }
             ringWrite = remaining;
 
-            if (!isFinal) {
-                String json = recognizer.getResult();
-                if (json != null && !json.isEmpty()) {
-                    var j = JsonParser.parseString(json);
-                    var word = j.getAsJsonObject().get("text");
-                    return word.getAsString();
+            if (isFinal) {
+                String json = recognizer.getFinalResult();
+                if (json != null) {
+                    var recognizerResult = gson.fromJson(json, RecognizerResult.class);
+
+                    if (recognizerResult != null && recognizerResult.text != null && !recognizerResult.text.isBlank() /* && recognizerResult.allOver(0.85)*/) {
+                        return recognizerResult.text;
+                    }
                 }
             }
         }
 
         return null;
     }
+
+    public record RecognizerResult(String text, List<Result> result) {
+        public record Result(double conf, String word) { }
+
+            boolean allOver(double c) {
+                if (result == null) {
+                    return false;
+                }
+
+                for (Result s : result) {
+                    if (s.conf < c) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
 
     private static byte[] shortsToLittleEndianBytes(short[] samples, int len) {
         byte[] out = new byte[len * 2];
@@ -98,12 +122,9 @@ public final class VoiceProcessor {
     public String flush() {
         String json = recognizer.getFinalResult();
         if (json != null) {
-            var j = JsonParser.parseString(json);
-            if (j.getAsJsonObject().has("text")) {
-                String text = j.getAsJsonObject().get("text").getAsString();
-                if (!text.isBlank()) {
-                    return text;
-                }
+            var recognizerResult = gson.fromJson(json, RecognizerResult.class);
+            if (recognizerResult != null && recognizerResult.allOver(0.85)) {
+                return recognizerResult.text;
             }
         }
 

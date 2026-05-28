@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 public class ReloadCommand extends AbstractAsyncCommand {
     public ReloadCommand() {
         super("magicvoices", "magicvoices.command");
-        this.setPermissionGroup(GameMode.Creative);
+        this.setPermissionGroups("magicvoices.command.reload");
     }
 
     @Nonnull

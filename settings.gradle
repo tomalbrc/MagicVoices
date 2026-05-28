@@ -9,8 +9,4 @@ pluginManagement {
     }
 }
 
-plugins {
-    id 'dev.scaffoldit' version '0.2.+' apply true
-}
-
 rootProject.name = 'MagicVoices'

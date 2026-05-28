@@ -1,42 +1,102 @@
 plugins {
-    id 'dev.scaffoldit' version '0.2.+'
+    id 'java'
+    id 'com.gradleup.shadow' version '9.3.1'
 }
 
 version = project.mod_version
 
-hytale {
-    usePatchline 'release'
-    useVersion 'latest'
+configurations {
+    shade
+    implementation.extendsFrom shade
+}
 
-    repositories {
-        mavenCentral()
-        maven { url 'https://jitpack.io' }
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven { url "https://maven.hytale.com/pre-release" }
+    maven { url "https://maven.hytale.com/release" }
+    maven { url "https://cursemaven.com" }
+    flatDir { dirs("libs") }
+}
+
+dependencies {
+    implementation "com.hypixel.hytale:Server:0.5.2"
+
+    shade 'io.github.jaredmdobson:concentus:1.0.1'
+    shade 'com.alphacephei:vosk:0.3.38'
+    shade 'net.java.dev.jna:jna:5.7.0'
+}
+
+shadowJar {
+    configurations = [project.configurations.shade]
+    mergeServiceFiles()
+
+}
+
+jar {
+    enabled = false
+    dependsOn shadowJar
+}
+
+import org.gradle.internal.os.OperatingSystem
+def getHytaleAssetsPath() {
+    def os = OperatingSystem.current()
+    def assetsPath
+
+    if (os.isWindows()) {
+        assetsPath = System.getenv("APPDATA") + "\\Hytale\\install\\release\\package\\game\\latest\\Assets.zip"
+    } else if (os.isMacOsX()) {
+        assetsPath = System.getProperty("user.home") + "/Library/Application Support/Hytale/install/release/package/game/latest/Assets.zip"
+    } else if (os.isLinux()) {
+        def flatpakPath = System.getProperty("user.home") + "/.var/app/com.hypixel.HytaleLauncher/data/Hytale/install/release/package/game/latest/Assets.zip"
+        def flatpakFile = file(flatpakPath)
+        if (flatpakFile.exists()) {
+            assetsPath = flatpakPath
+        } else {
+            assetsPath = System.getProperty("user.home") + "/.local/share/Hytale/install/release/package/game/latest/Assets.zip"
+        }
+    } else {
+        throw new GradleException("Unsupported operating system: $os")
     }
 
-    dependencies {
-        implementation 'io.github.jaredmdobson:concentus:1.0.1'
-        implementation 'com.github.veeley:jitsi-webrtc-vad-wrapper:8f2a3cc455'
+    return file(assetsPath)
+}
 
-        // Vosk Java binding (offline speech recognition)
-        implementation 'com.alphacephei:vosk:0.3.38'
+def serverRunDir = file("$projectDir/run")
 
-        // required by Vosk for native bindings
-        implementation 'net.java.dev.jna:jna:5.7.0'
-    }
+tasks.register('runServer', JavaExec) {
+    group = "application"
+    description = "Run the Hytale server with local mods"
 
-    manifest {
-        group = project.group
-        name = project.name
-        main = project.entry_point
-        version = project.version
-        serverVersion = project.hytale_version
-        disabledByDefault = false
-        includesAssetPack = false
-        dependencies = [
-                'Hytale:EntityModule': '*',
-                'Hytale:ItemModule': '*',
-                'Hytale:VoiceModule': '*'
-        ]
-        subPlugins = []
+    mainClass = 'com.hypixel.hytale.Main'
+    classpath = sourceSets.main.runtimeClasspath - sourceSets.main.output
+
+    def modsDir = file("$buildDir/runMods")
+    def shadowJarFile = tasks.shadowJar.outputs.files.singleFile
+
+    args = [
+            "--allow-op",
+            "--disable-sentry",
+            "--assets=${getHytaleAssetsPath().absolutePath}",
+            "--mods=${modsDir.absolutePath}",
+            "--auth-mode=authenticated"
+    ]
+
+    workingDir = serverRunDir
+    standardInput = System.in
+    dependsOn shadowJar
+
+    doFirst {
+        serverRunDir.mkdirs()
+        modsDir.mkdirs()
+
+        copy {
+            from shadowJarFile
+            into modsDir
+            rename { "ItemsFloat.jar" }
+        }
+        if (!getHytaleAssetsPath().exists()) {
+            println "Warning: Assets.zip not found at ${getHytaleAssetsPath()}"
+        }
     }
 }
