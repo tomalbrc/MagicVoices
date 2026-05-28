@@ -88,6 +88,13 @@ public class MagicVoicesPlugin extends JavaPlugin {
         });
     }
 
+    @Override
+    protected void shutdown() {
+        super.shutdown();
+
+        VoiceHandler.SCHEDULED_EXECUTOR.shutdown();
+    }
+
     private static void handleSpokenWordEvent(SpokenWordEvent event, Ref<EntityStore> ref) {
         var store = ref.getStore();
         var hotbar = ref.getStore().getComponent(ref, InventoryComponent.Hotbar.getComponentType());
